@@ -202,6 +202,12 @@ namespace HeathenEngineering.BGSDK.Engine
             data = webResults.result;
         }
 
+        public void Set(TokenResponceData data)
+        {
+            this.data = data;
+        }
+
+
         public TokenDefinition GetTokenDefinition()
         {
             return data;

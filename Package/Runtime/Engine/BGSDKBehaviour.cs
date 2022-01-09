@@ -10,7 +10,7 @@ namespace HeathenEngineering.BGSDK.Engine
     public class BGSDKBehaviour : MonoBehaviour
     {
         public BGSDKSettings settings;
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
         public bool LoginClientSecret = false;
 #endif
 
@@ -19,8 +19,11 @@ namespace HeathenEngineering.BGSDK.Engine
 
         void Start()
         {
+
+            Debug.Log("BGSDKBehaviour start");
+
             BGSDKSettings.current = settings;
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
             if (LoginClientSecret && !string.IsNullOrEmpty(settings.appId.clientSecret))
             {
                 StartCoroutine(ClientSecretAuthentication(HandleSecretAuthenticationResponce));
@@ -29,7 +32,7 @@ namespace HeathenEngineering.BGSDK.Engine
         }
 
         #region Server
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
         /// <summary>
         /// Logs in via the client secret ... this is only usable by servers and the Unity Editor and will not have an user data
         /// </summary>

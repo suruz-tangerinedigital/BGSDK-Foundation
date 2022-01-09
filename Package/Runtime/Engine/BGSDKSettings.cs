@@ -37,6 +37,11 @@ namespace HeathenEngineering.BGSDK.Engine
         [FormerlySerializedAs("Business")]
         public DomainTarget business = new DomainTarget("https://api-business-staging.arkane.network", "https://api-business.arkane.network");
 
+        /// <summary>
+        /// Endpoint used by the Market
+        /// </summary>
+        public DomainTarget market = new DomainTarget("https://api-staging.arkane.market", "https://api-business.arkane.market");
+
 
         [Obsolete("Use useSettings instead.")]
         public bool UseStaging => useStaging;
@@ -172,5 +177,7 @@ namespace HeathenEngineering.BGSDK.Engine
 
             return AppsUri + "/" + app.applicationId.ToString() + "/contracts";
         }
+
+        public string offerUrl => market[useStaging] + "/offers";
     }
 }

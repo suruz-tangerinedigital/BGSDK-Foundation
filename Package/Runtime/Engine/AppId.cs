@@ -15,7 +15,7 @@ namespace HeathenEngineering.BGSDK.Engine
         public static readonly AppId Invalid = new AppId(Guid.Empty);
         public string applicationId;
         public string clientId;
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
         public string clientSecret;
 #endif
         public string name;
@@ -27,7 +27,7 @@ namespace HeathenEngineering.BGSDK.Engine
         {
             this.applicationId = id;
             clientId = string.Empty;
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
             clientSecret = string.Empty;
 #endif
             name = string.Empty;
@@ -40,7 +40,7 @@ namespace HeathenEngineering.BGSDK.Engine
         {
             this.applicationId = id.ToString("D");
             clientId = string.Empty;
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
             clientSecret = string.Empty;
 #endif
             name = string.Empty;
@@ -49,7 +49,7 @@ namespace HeathenEngineering.BGSDK.Engine
             imageUrl = string.Empty;
         }
 
-#if UNITY_SERVER || UNITY_EDITOR
+#if UNITY_SERVER || UNITY_EDITOR || UNITY_ANDROID
         public AppId(Guid id, string secret)
         {
             this.applicationId = id.ToString("D");

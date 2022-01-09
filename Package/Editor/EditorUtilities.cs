@@ -474,7 +474,6 @@ namespace HeathenEngineering.BGSDK.Editor
                                             yield return null;
 
                                         WebResults<TokenResponceData> webResult = new WebResults<TokenResponceData>(wwwFullToken);
-
                                         if (!webResult.isNetworkError && !webResult.isHttpError)
                                         {
                                             var arkaneToken = arkaneContract.tokens.FirstOrDefault(p => p.Id == tokenData.id);
@@ -516,7 +515,7 @@ namespace HeathenEngineering.BGSDK.Editor
                                                      **********************************************************************************/
 
                                                     arkaneToken = ScriptableObject.CreateInstance<Engine.Token>();
-                                                    arkaneToken.name = arkaneContract.name + " : " + webResult.result.name;
+                                                    arkaneToken.name = arkaneContract.name + "_ _ _" + webResult.result.name;
                                                     arkaneToken.Set(webResult);
                                                     arkaneToken.UpdatedFromServer = true;
                                                     arkaneToken.UpdatedOn = DateTime.Now.ToBinary();
@@ -529,14 +528,29 @@ namespace HeathenEngineering.BGSDK.Editor
                                                     }
                                                     else if (Path.GetExtension(path) != "")
                                                     {
-                                                        path = path.Replace(Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+                                                        path = path.Replace(Path.GetFileName(path), "");
                                                     }
 
-                                                    string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + arkaneToken.name + ".asset");
+                                                    Debug.Log(path);
+                                                    Debug.Log(arkaneToken.name);
 
-                                                    AssetDatabase.CreateAsset(arkaneToken, assetPathAndName);
-                                                    UnityEditor.EditorUtility.SetDirty(arkaneContract);
-                                                    AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(settings));
+                                                    if (arkaneToken.name.IndexOf("/") > 0 || arkaneToken.name.IndexOf(":") > 0)
+                                                    {
+
+                                                        string assetPathAndName = path + "/" + arkaneToken.name.Replace('/', ' ').Replace(':', ' ') + ".asset";// AssetDatabase.GenerateUniqueAssetPath(path + "/" + arkaneToken.name.Replace("/", "") + ".asset");
+                                                        
+                                                        AssetDatabase.CreateAsset(arkaneToken, assetPathAndName);
+                                                        UnityEditor.EditorUtility.SetDirty(arkaneContract);
+                                                        AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(settings));
+                                                    }
+                                                    else
+                                                    {
+                                                        string assetPathAndName = path + "/" + arkaneToken.name + ".asset";// AssetDatabase.GenerateUniqueAssetPath(path + "/" + arkaneToken.name + ".asset");
+
+                                                        AssetDatabase.CreateAsset(arkaneToken, assetPathAndName);
+                                                        UnityEditor.EditorUtility.SetDirty(arkaneContract);
+                                                        AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(settings));
+                                                    }
                                                 }
                                             }
                                         }

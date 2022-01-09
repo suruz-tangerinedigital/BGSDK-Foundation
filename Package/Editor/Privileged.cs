@@ -8,7 +8,7 @@ using System.Text;
 
 namespace HeathenEngineering.BGSDK.API
 {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_ANDROID
     /// <summary>
     /// Privileged features only work in restricted environments with restricted cradentials.
     /// </summary>
@@ -62,7 +62,7 @@ namespace HeathenEngineering.BGSDK.API
                 {
                     var data = new MintNonFungibleRequest()
                     {
-                        typeId = token.TypeId.ToString(),
+                        typeId = token.Id.ToString(),
                         destinations = destinations
                     };
 

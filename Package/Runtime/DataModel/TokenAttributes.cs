@@ -13,7 +13,7 @@ namespace HeathenEngineering.BGSDK.DataModel
         }
 
         public string name;
-        public Type type;
+        public string type;
         public string value;
         [UnityEngine.Tooltip("This is only applied when the type is \"stat\"")]
         public ulong maxValue;
