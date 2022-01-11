@@ -268,9 +268,11 @@ namespace HeathenEngineering.BGSDK.API
                             description = "Hammer v-" + DateTime.Now.Millisecond,
                             fungible = false,
                             burnable = true,
-                            externalUrl = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_hammer_4.png",
-                            image = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_hammer_4.png",
+                            externalUrl = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
+                            image = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
                             currentSupply = 0,
+                            maxSupply = 10000,
+
                             attributes = new TokenAttributes[] {
                                 new TokenAttributes(){
                                 type = "property",
@@ -301,9 +303,10 @@ namespace HeathenEngineering.BGSDK.API
                             description = "Axe v-" + DateTime.Now.Millisecond,
                             fungible = false,
                             burnable = true,
-                            externalUrl = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_axe_1.png",
-                            image = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_axe_1.png",
+                            externalUrl = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
+                            image = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
                             currentSupply = 0,
+                            maxSupply = 10000,
                             attributes = new TokenAttributes[] {
                                 new TokenAttributes(){
                                 type = "property",
@@ -363,10 +366,17 @@ namespace HeathenEngineering.BGSDK.API
                             try
                             {
                                 string resultContent = www.downloadHandler.text;
+                                TokenDefinition def = JsonUtility.FromJson<TokenDefinition>(resultContent);
                                 results.result = (TokenResponceData)JsonUtility.FromJson<TokenResponceData>(resultContent);
                                 results.result.contractAddress = contract.data.address;
                                 results.result.contractTypeId = new System.Numerics.BigInteger(int.Parse(contract.data.id));// ;
 
+                                TokenDefinition result_def = results.result as TokenDefinition;
+
+                                if(result_def != null)
+                                {
+                                    result_def = def;
+                                }
                                 results.message = "Create Token type complete.";
                                 results.success = true;
                                 results.httpCode = www.responseCode;
@@ -1111,7 +1121,7 @@ namespace HeathenEngineering.BGSDK.API
 
         public static class Market
         {
-            public static IEnumerator CreateOffer(Token token, string walletAddress)
+            public static IEnumerator CreateOffer(string id_nft, string contract_address, string walletAddress, Action<OfferResult> callback)
             {
 
                 if (BGSDKSettings.current == null)
@@ -1121,7 +1131,6 @@ namespace HeathenEngineering.BGSDK.API
                 }
                 else
                 {
-
                     if (BGSDKSettings.user == null)
                     {
                         //callback(new DefineTokenTypeResult() { hasError = true, message = "BGSDKSettings.user required, null Settings.user provided.\n Please initalize the Settings.user before calling CreateTokenType" });
@@ -1132,15 +1141,15 @@ namespace HeathenEngineering.BGSDK.API
 
                         NFT nft = new NFT()
                         {
-                            address = token.Address,
-                            tokenId = token.Id,
+                            address = contract_address,
+                            tokenId = id_nft,
                             chain = "MATIC"
                         };
 
                         OfferBody body = new OfferBody()
                         {
                             nft = nft,
-                            price = UnityEngine.Random.Range(0, 100) + "",
+                            price = UnityEngine.Random.Range(0.001f, 1.0f).ToString("f4") + "",
                             sellerAddress = walletAddress
                         };
 
@@ -1178,7 +1187,7 @@ namespace HeathenEngineering.BGSDK.API
                             }
                             finally
                             {
-                                //callback(results);
+                                callback(results);
                             }
 
                         }
@@ -1186,6 +1195,122 @@ namespace HeathenEngineering.BGSDK.API
                     }
                 }
             }
+
+            public static IEnumerator SignOffer(string walletId, string data, string pincode, Action<OfferSignatureResult> callback)
+            {
+
+                if (BGSDKSettings.current == null)
+                {
+                    Debug.Log("Attempted to call BGSDK.Wallets.List with no BGSDK.Settings object applied.");
+                    yield return null;
+                }
+                else
+                {
+                    if (BGSDKSettings.user == null)
+                    {
+                        Debug.Log("BGSDKSettings.user required, null Settings.user provided.");
+                        yield return null;
+                    }
+                    else
+                    {
+                        OfferSignature signature = new OfferSignature
+                        {
+                            pincode = pincode,
+                            signatureRequest = new SignatureRequest
+                            {
+                                data = data,
+                                walletId = walletId
+                            }
+                        };
+
+                        var jsonString = JsonUtility.ToJson(signature);
+
+                        UnityWebRequest www = UnityWebRequest.Put(BGSDKSettings.current.api[BGSDKSettings.current.useStaging] + "/api/signatures", jsonString);
+                        www.method = UnityWebRequest.kHttpVerbPOST;
+                        www.SetRequestHeader("Authorization", BGSDKSettings.user.authentication.token_type + " " + BGSDKSettings.user.authentication.access_token);
+                        www.uploadHandler.contentType = "application/json;charset=UTF-8";
+                        www.SetRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+                        var co = www.SendWebRequest();
+                        while (!co.isDone)
+                            yield return null;
+
+                        if (!www.isNetworkError && !www.isHttpError)
+                        {
+                            var results = new OfferSignatureResult();
+                            try
+                            {
+                                string resultContent = www.downloadHandler.text;
+                                results = JsonUtility.FromJson<OfferSignatureResult>(resultContent);
+                                results.message = "Sign Offer complete.";
+                                results.httpCode = www.responseCode;
+                                Debug.Log(resultContent);
+                                //Info = resultContent;
+                            }
+                            catch (Exception ex)
+                            {
+                                results = null;
+                                results.message = "An error occured while processing JSON results, see exception for more details.";
+                                results.exception = ex;
+                                results.httpCode = www.responseCode;
+                            }
+                            finally
+                            {
+                                callback(results);
+                            }
+
+                        }
+
+                    }
+                }
+
+            }
+
+
+           public  static IEnumerator Sign(string signature, string offerid)
+            {
+                //now use this def to body
+                var jsonString = "{\"signature\":\"" + signature + "\" }";
+
+                var www = new UnityWebRequest(BGSDKSettings.current.offerUrl + "/" + offerid + "/signature", "PATCH");
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonString);
+                www.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                www.uploadHandler.contentType = "application/json";
+                www.SetRequestHeader("Authorization", BGSDKSettings.user.authentication.token_type + " " + BGSDKSettings.user.authentication.access_token);
+                www.SetRequestHeader("Content-Type", "application/json");
+              
+
+
+
+                var co = www.SendWebRequest();
+                while (!co.isDone)
+                    yield return null;
+
+                if (!www.isNetworkError && !www.isHttpError)
+                {
+                    var results = new OfferResult();
+                    try
+                    {
+                        string resultContent = www.downloadHandler.text;
+                        results = JsonUtility.FromJson<OfferResult>(resultContent);
+                        results.message = "Initiating Offer complete.";
+                        results.httpCode = www.responseCode;
+                        Debug.Log(resultContent);
+                        //Info = resultContent;
+                    }
+                    catch (Exception ex)
+                    {
+                        results = null;
+                        results.message = "An error occured while processing JSON results, see exception for more details.";
+                        results.exception = ex;
+                        results.httpCode = www.responseCode;
+                    }
+
+
+                }
+            }
+
 
         }
 
@@ -1195,130 +1320,144 @@ namespace HeathenEngineering.BGSDK.API
 
         #region privileged
 
-        private class MintNonFungibleRequest
+        public class Privileged
         {
-            public string typeId;
-            public string[] destinations;
-        }
 
-        private class MintFungibleRequest
-        {
-            public int[] amounts;
-            public string[] destinations;
-        }
-
-        /// <summary>
-        /// Create a NFT for each destination provided
-        /// </summary>
-        /// <remarks>
-        /// See <see href="https://docs.venly.io/api/api-products/nft-api/mint-nft"/> for details
-        /// </remarks>
-        /// <param name="token"></param>
-        /// <param name="destinations">The wallets to add the token to</param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public static IEnumerator MintNonFungibleToken(Token token, string[] destinations, Action<BGSDKBaseResult> callback)
-        {
-            if (BGSDKSettings.current == null)
+            private class MintNonFungibleRequest
             {
-                callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "Attempted to call BGSDK.Tokens.MintNonFungibleToken with no BGSDK.Settings object applied." });
-                yield return null;
+                public string typeId;
+                public string[] destinations;
             }
-            else
+
+            private class MintFungibleRequest
             {
-                if (BGSDKSettings.user == null)
+                public int[] amounts;
+                public string[] destinations;
+            }
+
+            public class MintResult : DataModel.BGSDKBaseResult
+            {
+                public List<ulong> tokenIds;
+            }
+
+            /// <summary>
+            /// Create a NFT for each destination provided
+            /// </summary>
+            /// <remarks>
+            /// See <see href="https://docs.venly.io/api/api-products/nft-api/mint-nft"/> for details
+            /// </remarks>
+            /// <param name="token"></param>
+            /// <param name="destinations">The wallets to add the token to</param>
+            /// <param name="callback"></param>
+            /// <returns></returns>
+            public static IEnumerator MintNonFungibleToken(Token token, string[] destinations, Action<MintResult> callback)
+            {
+                if (BGSDKSettings.current == null)
                 {
-                    callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "BGSDKIdentity required, null identity provided.\nPlease initalize Settings.user before calling Privileged.MintNonFungibleToken" });
+                    callback(new MintResult() { hasError = true, message = "Attempted to call BGSDK.Tokens.MintNonFungibleToken with no BGSDK.Settings object applied." });
                     yield return null;
                 }
                 else
                 {
-                    var data = new MintNonFungibleRequest()
+                    if (BGSDKSettings.user == null)
                     {
-                        typeId = token.Id.ToString(),
-                        destinations = destinations
-                    };
-
-                    var request = new UnityWebRequest(BGSDKSettings.current.MintTokenUri(token.contract) + "/non-fungible", "POST");
-                    byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-                    request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-                    request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-                    request.SetRequestHeader("Authorization", BGSDKSettings.user.authentication.token_type + " " + BGSDKSettings.user.authentication.access_token);
-                    request.SetRequestHeader("Content-Type", "application/json");
-                    var async = request.SendWebRequest();
-
-                    while (!async.isDone)
+                        callback(new MintResult() { hasError = true, message = "BGSDKIdentity required, null identity provided.\nPlease initalize Settings.user before calling Privileged.MintNonFungibleToken" });
                         yield return null;
-
-                    if (!request.isNetworkError && !request.isHttpError)
-                    {
-                        callback(new DataModel.BGSDKBaseResult() { hasError = false, message = "Successful request to mint token!", httpCode = request.responseCode });
                     }
                     else
                     {
-                        callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "Error:" + (request.isNetworkError ? " a network error occured while attempting to mint a token." : " a HTTP error occured while attempting to mint a token."), httpCode = request.responseCode });
+                        var data = new MintNonFungibleRequest()
+                        {
+                            typeId = token.Id.ToString(),
+                            destinations = destinations
+                        };
+
+                        var request = new UnityWebRequest(BGSDKSettings.current.MintTokenUri(token.contract) + "/non-fungible", "POST");
+                        byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+                        request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                        request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                        request.SetRequestHeader("Authorization", BGSDKSettings.user.authentication.token_type + " " + BGSDKSettings.user.authentication.access_token);
+                        request.SetRequestHeader("Content-Type", "application/json");
+                        var async = request.SendWebRequest();
+
+                        while (!async.isDone)
+                            yield return null;
+
+                        if (!request.isNetworkError && !request.isHttpError)
+                        {
+                            //Debug json deserialize - requires triming mint result json
+                            string mint_result_json = request.downloadHandler.text.Trim(new char[] { '[', ']' });
+                            MintResult mint_result_wrapper = JsonUtility.FromJson<MintResult>(mint_result_json);
+                            mint_result_wrapper.httpCode = request.responseCode;
+                            mint_result_wrapper.message = "Mint NFT complete";
+                            callback(mint_result_wrapper);
+                        }
+                        else
+                        {
+                            callback(new MintResult() { hasError = true, message = "Error:" + (request.isNetworkError ? " a network error occured while attempting to mint a token." : " a HTTP error occured while attempting to mint a token."), httpCode = request.responseCode });
+                        }
                     }
                 }
             }
-        }
 
-        /// <summary>
-        /// Create a fungible token for each destination provided
-        /// </summary>
-        /// <remarks>
-        /// See <see href="https://docs.venly.io/api/api-products/nft-api/mint-fungible-nft"/> for details
-        /// </remarks>
-        /// <param name="token"></param>
-        /// <param name="amounts">The amount of tokens to add to each wallet</param>
-        /// <param name="destinations">The wallets to add the tokens to</param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public static IEnumerator MintFungibleToken(Token token, int[] amounts, string[] destinations, Action<BGSDKBaseResult> callback)
-        {
-            if (BGSDKSettings.current == null)
+            /// <summary>
+            /// Create a fungible token for each destination provided
+            /// </summary>
+            /// <remarks>
+            /// See <see href="https://docs.venly.io/api/api-products/nft-api/mint-fungible-nft"/> for details
+            /// </remarks>
+            /// <param name="token"></param>
+            /// <param name="amounts">The amount of tokens to add to each wallet</param>
+            /// <param name="destinations">The wallets to add the tokens to</param>
+            /// <param name="callback"></param>
+            /// <returns></returns>
+            public static IEnumerator MintFungibleToken(Token token, int[] amounts, string[] destinations, Action<BGSDKBaseResult> callback)
             {
-                callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "Attempted to call BGSDK.Tokens.MintFungibleToken with no BGSDK.Settings object applied." });
-                yield return null;
-            }
-            else
-            {
-                if (BGSDKSettings.user == null)
+                if (BGSDKSettings.current == null)
                 {
-                    callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "BGSDKIdentity required, null identity provided.\nPlease initalize Settings.user before calling Privileged.MintFungibleToken" });
+                    callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "Attempted to call BGSDK.Tokens.MintFungibleToken with no BGSDK.Settings object applied." });
                     yield return null;
                 }
                 else
                 {
-                    var data = new MintFungibleRequest()
+                    if (BGSDKSettings.user == null)
                     {
-                        amounts = amounts,
-                        destinations = destinations
-                    };
-
-                    var request = new UnityWebRequest(BGSDKSettings.current.MintTokenUri(token.contract) + "/fungible/" + token.TypeId.ToString(), "POST");
-                    byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
-                    request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-                    request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-                    request.SetRequestHeader("Authorization", BGSDKSettings.user.authentication.token_type + " " + BGSDKSettings.user.authentication.access_token);
-                    request.SetRequestHeader("Content-Type", "application/json");
-                    var async = request.SendWebRequest();
-
-                    while (!async.isDone)
+                        callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "BGSDKIdentity required, null identity provided.\nPlease initalize Settings.user before calling Privileged.MintFungibleToken" });
                         yield return null;
-
-                    if (!request.isNetworkError && !request.isHttpError)
-                    {
-                        callback(new DataModel.BGSDKBaseResult() { hasError = false, message = "Successful request to mint token!", httpCode = request.responseCode });
                     }
                     else
                     {
-                        callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "Error:" + (request.isNetworkError ? " a network error occured while attempting to mint a token." : " a HTTP error occured while attempting to mint a token."), httpCode = request.responseCode });
+                        var data = new MintFungibleRequest()
+                        {
+                            amounts = amounts,
+                            destinations = destinations
+                        };
+
+                        var request = new UnityWebRequest(BGSDKSettings.current.MintTokenUri(token.contract) + "/fungible/" + token.TypeId.ToString(), "POST");
+                        byte[] bodyRaw = Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+                        request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+                        request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+                        request.SetRequestHeader("Authorization", BGSDKSettings.user.authentication.token_type + " " + BGSDKSettings.user.authentication.access_token);
+                        request.SetRequestHeader("Content-Type", "application/json");
+                        var async = request.SendWebRequest();
+
+                        while (!async.isDone)
+                            yield return null;
+
+                        if (!request.isNetworkError && !request.isHttpError)
+                        {
+                            callback(new DataModel.BGSDKBaseResult() { hasError = false, message = "Successful request to mint token!", httpCode = request.responseCode });
+                        }
+                        else
+                        {
+                            callback(new DataModel.BGSDKBaseResult() { hasError = true, message = "Error:" + (request.isNetworkError ? " a network error occured while attempting to mint a token." : " a HTTP error occured while attempting to mint a token."), httpCode = request.responseCode });
+                        }
                     }
                 }
             }
-        }
 
-        #endregion
+            #endregion
+        }
 
 
     }

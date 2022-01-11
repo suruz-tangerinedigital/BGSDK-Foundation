@@ -64,10 +64,64 @@ namespace HeathenEngineering.BGSDK.DataModel
 
     }
 
+    [Serializable]
+    public class OfferResultData
+    {
+        public string id;
+        public NFTDefination nft;
+        public string dataToSign;
+        public string signed = "false";
+    }
+
+    [Serializable]
+    public class OfferResult : BGSDKBaseResult
+    {
+        public OfferResultData result;
+    }
+
+
+    /*
+     * Worked before
+    [Serializable]
     public class OfferResult : BGSDKBaseResult
     {
         public string id;
         NFTDefination nft;
+    }*/
+
+
+    [Serializable]
+    public class SignatureRequest
+    {
+        public string type = "MESSAGE";
+        public string secretType = "MATIC"; //This could be any type
+        public string walletId = "";
+        public string data = "";
+    }
+
+    [Serializable]
+    public class OfferSignature
+    {
+        public string pincode = "";
+        public SignatureRequest signatureRequest;
+    }
+
+
+    [Serializable]
+    public class OfferSignatureData
+    {
+        public string type;
+        public string signature;
+        public string r;
+        public string s;
+        public string v;
+    }
+
+    [Serializable]
+    public class OfferSignatureResult: BGSDKBaseResult
+    {
+        public string success;
+        public OfferSignatureData result;
     }
 
     #endregion

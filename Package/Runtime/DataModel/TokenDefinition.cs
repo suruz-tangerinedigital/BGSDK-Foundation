@@ -19,6 +19,8 @@ namespace HeathenEngineering.BGSDK.DataModel
         public string description;
         [HideInInspector]
         public ulong currentSupply;
+        [HideInInspector]
+        public ulong maxSupply;
         public bool fungible;
         public bool burnable;
         /// <summary>
