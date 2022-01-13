@@ -42,8 +42,8 @@ namespace HeathenEngineering.BGSDK.DataModel
     public class OfferBody
     {
         public  string type = "SALE";
-        public  NFT nft;//= new NFT("", "", SecretType.MATIC);
-        public  string sellerAddress = "0xdb7c22EA49EF93F753F2ed4c9E1A2589aC6E7690";
+        public  NFT nft;
+        public  string sellerAddress;
         public  string price;
     }
     #endregion
@@ -94,9 +94,9 @@ namespace HeathenEngineering.BGSDK.DataModel
     public class SignatureRequest
     {
         public string type = "MESSAGE";
-        public string secretType = "MATIC"; //This could be any type
-        public string walletId = "";
-        public string data = "";
+        public string secretType; //This could be any type
+        public string walletId;
+        public string data;
     }
 
     [Serializable]

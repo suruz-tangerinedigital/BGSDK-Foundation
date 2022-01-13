@@ -268,8 +268,8 @@ namespace HeathenEngineering.BGSDK.API
                             description = "Hammer v-" + DateTime.Now.Millisecond,
                             fungible = false,
                             burnable = true,
-                            externalUrl = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
-                            image = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
+                            externalUrl = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_hammer_4.png",
+                            image = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_hammer_4.png",
                             currentSupply = 0,
                             maxSupply = 10000,
 
@@ -303,8 +303,8 @@ namespace HeathenEngineering.BGSDK.API
                             description = "Axe v-" + DateTime.Now.Millisecond,
                             fungible = false,
                             burnable = true,
-                            externalUrl = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
-                            image = "https://static.wikia.nocookie.net/parody/images/4/42/74915084_10162764640400387_6139958579186106368_o.jpg",
+                            externalUrl = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_axe_1.png",
+                            image = "https://bitbucket.org/rabbi062/nft-project/raw/1a641e6d7c0b86eff78873fcabdeb2528239d9d6/Assets/GUI%20PRO%20Kit%20-%20Fantasy%20RPG/ResourcesData/Sprites/Component/Icon_EquipmentIcons_(Original)/equip_axe_1.png",
                             currentSupply = 0,
                             maxSupply = 10000,
                             attributes = new TokenAttributes[] {
@@ -1121,7 +1121,7 @@ namespace HeathenEngineering.BGSDK.API
 
         public static class Market
         {
-            public static IEnumerator CreateOffer(string id_nft, string contract_address, string walletAddress, Action<OfferResult> callback)
+            public static IEnumerator CreateOffer(string id_nft, string contract_address, string walletAddress, string chain, Action<OfferResult> callback)
             {
 
                 if (BGSDKSettings.current == null)
@@ -1143,7 +1143,7 @@ namespace HeathenEngineering.BGSDK.API
                         {
                             address = contract_address,
                             tokenId = id_nft,
-                            chain = "MATIC"
+                            chain = chain
                         };
 
                         OfferBody body = new OfferBody()
@@ -1196,7 +1196,7 @@ namespace HeathenEngineering.BGSDK.API
                 }
             }
 
-            public static IEnumerator SignOffer(string walletId, string data, string pincode, Action<OfferSignatureResult> callback)
+            public static IEnumerator SignOffer(string walletId, string data, string pincode, string secretType,  Action<OfferSignatureResult> callback)
             {
 
                 if (BGSDKSettings.current == null)
@@ -1219,7 +1219,9 @@ namespace HeathenEngineering.BGSDK.API
                             signatureRequest = new SignatureRequest
                             {
                                 data = data,
-                                walletId = walletId
+                                walletId = walletId,
+                                secretType = secretType
+
                             }
                         };
 
