@@ -1035,6 +1035,9 @@ namespace HeathenEngineering.BGSDK.API
             /// <returns>The Unity routine enumerator</returns>
             public static IEnumerator NFTs(string walletAddress, SecretType chain, List<string> optionalContractAddresses, Action<NFTBalanceResult> callback)
             {
+
+                //Debug.Log(optionalContractAddresses[0]);
+
                 if (BGSDKSettings.current == null)
                 {
                     callback(new NFTBalanceResult()
@@ -1172,10 +1175,11 @@ namespace HeathenEngineering.BGSDK.API
                             try
                             {
                                 string resultContent = www.downloadHandler.text;
-                                results = JsonUtility.FromJson<OfferResult>(resultContent);
-                                results.message = "Create Offer complete.";
-                                results.httpCode = www.responseCode;
                                 Debug.Log(resultContent);
+                                results = JsonUtility.FromJson<OfferResult>(resultContent);
+                                results.message = "Create Offer complete. \n" + resultContent;
+                                results.httpCode = www.responseCode;
+                             
                                 //Info = resultContent;
                             }
                             catch (Exception ex)

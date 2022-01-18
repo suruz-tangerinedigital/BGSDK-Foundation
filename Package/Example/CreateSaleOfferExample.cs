@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using HeathenEngineering.BGSDK.API;
 using HeathenEngineering.BGSDK.DataModel;
 using HeathenEngineering.BGSDK.Engine; //for BG SDK Setting
+
 
 public class CreateSaleOfferExample : MonoBehaviour
 {
@@ -16,6 +18,7 @@ public class CreateSaleOfferExample : MonoBehaviour
 
 	[Header("Demo Contruct")]
 	[SerializeField] public Contract contract;
+	[SerializeField] public List<Token> tokens;
 
 	[Header("Wallet Info")]
 	[SerializeField] string walletAddress;
@@ -24,13 +27,20 @@ public class CreateSaleOfferExample : MonoBehaviour
 
 	[Header("Secrect Info")]
 	[SerializeField] Secrect chain;
-	
+
+	[Header("Output Console")]
+	public Text console;
+
+	bool isInProgress = false;
+
+
+
 
 
 	// Start is called before the first frame update
 	void Start()
     {
-		
+		isInProgress = false;
 	}
 
     // Update is called once per frame
@@ -44,12 +54,23 @@ public class CreateSaleOfferExample : MonoBehaviour
 	 */
     public void InitOffer()
 	{
-		Debug.Log("CreateTokenType");
-		StartCoroutine(Server.Tokens.CreateTokenType(contract, CreateTokenResult));
+		//if (isInProgress) return;
+
+		int id = UnityEngine.Random.Range(0, 2);
+		if (id < tokens.Count)
+		{
+			Token arkaneToken = tokens[id];
+			arkaneToken.contract = contract;
+			isInProgress = true;
+			StartCoroutine(Server.Privileged.MintNonFungibleToken(arkaneToken, new string[] { this.walletAddress }, mintTokenResult));
+		}
 	}
 
 	void CreateTokenResult(DefineTokenTypeResult result)
 	{
+		console.text = result.message;
+		return;
+
 		Debug.Log(result.message);
 		if (!result.hasError)
 		{
@@ -72,6 +93,8 @@ public class CreateSaleOfferExample : MonoBehaviour
 
 		if (!result.hasError)
 		{
+			System.Threading.Thread.Sleep(2000);
+			console.text = result.message;
 			StartCoroutine(Server.Market.CreateOffer(result.tokenIds[0].ToString(), contract.Address, this.walletAddress, this.chain.ToString(), CreateOfferResult));
 		}
 	}
@@ -80,6 +103,8 @@ public class CreateSaleOfferExample : MonoBehaviour
 	{
 		if (result != null && !result.hasError)
 		{
+			System.Threading.Thread.Sleep(2000);
+			console.text = result.message;
 			OfferId = result.result.id;
 			StartCoroutine(Server.Market.SignOffer(this.walletId, result.result.dataToSign, pinCode, this.chain.ToString(), SignOfferResult));
 		}
@@ -89,8 +114,12 @@ public class CreateSaleOfferExample : MonoBehaviour
 	{
 		if (result != null && !result.hasError)
 		{
+			System.Threading.Thread.Sleep(2000);
+			console.text = result.message;
 			StartCoroutine(Server.Market.Sign(result.result.signature, OfferId));
 		}
+
+		isInProgress = false;
 	}
 
 	string OfferId = "";
